@@ -40,18 +40,27 @@ class TransactionStatisticsTest extends FunSuite {
     val inputdata: List[Transaction] = csvReader("./src/test/resources/test_data.txt")
     val output: Map[String, Map[String, Double]] = groupIDCatAvgAmount(inputdata)
     val expected:Map[String, Map[String, Double]] = Map(
-      ("a", Map(("GG", 22.35))),
+      ("a", Map(("CC", 22.35), ("AA", 34.2))),
       ("b", Map(("BB", 23.4))),
       ("c", Map(("DD", 21.3))),
-      ("d", Map(("DD", 23.8), ("AA", 54.6))),
-      ("e", Map(("BB", 14.4)))
+      ("d", Map(("FF", 23.8), ("AA", 54.6))),
+      ("e", Map(("BB", 14.4), ("FF", 35.6)))
     )
 
     assert(output == expected)
   }
 
   test("testLastFiveDayStatistics") {
+    val inputdata: List[Transaction] = csvReader("./src/test/resources/test_lastfive.txt")
+    val output: List[AccountStats] = lastFiveDayStatistics(inputdata)
+    val expected:List[AccountStats] = List(
+      AccountStats(1, "a", 85.6, 42.36667, 148, 35.1, 60.6),
+      AccountStats(2, "a", 34.2, 27.21667, 63.6, 23.6, 49.6),
+      AccountStats(1, "b", 65.4, 37.25, 0, 91.7, 31.2),
+      AccountStats(2, "b", 62.1, 25.11667, 0, 48.7, 14.5)
+    )
 
+    assert(output == expected)
   }
 
 }
