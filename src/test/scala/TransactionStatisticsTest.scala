@@ -40,11 +40,11 @@ class TransactionStatisticsTest extends FunSuite {
     val inputdata: List[Transaction] = csvReader("./src/test/resources/test_data.txt")
     val output: Map[String, Map[String, Double]] = groupIDCatAvgAmount(inputdata)
     val expected:Map[String, Map[String, Double]] = Map(
-      ("a", Map(("CC", 22.35), ("AA", 34.2))),
+      ("a", Map(("GG", 22.35))),
       ("b", Map(("BB", 23.4))),
       ("c", Map(("DD", 21.3))),
-      ("d", Map(("FF", 23.8), ("AA", 54.6))),
-      ("e", Map(("BB", 14.4), ("FF", 35.6)))
+      ("d", Map(("DD", 23.8), ("AA", 54.6))),
+      ("e", Map(("BB", 14.4)))
     )
 
     assert(output == expected)
