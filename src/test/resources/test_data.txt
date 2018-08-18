@@ -1,0 +1,8 @@
+transactionId,accountId,transactionDay,category,transactionAmount
+T1,a,1,GG,10.5
+T2,b,1,BB,23.4
+T3,c,1,DD,21.3
+T4,d,2,DD,23.8
+T5,e,3,BB,14.4
+T5,d,3,AA,54.6
+T5,a,3,GG,34.2
