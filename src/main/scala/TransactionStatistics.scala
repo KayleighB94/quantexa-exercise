@@ -8,6 +8,15 @@ object TransactionStatistics {
     // Read data
     val data: List[Transaction] = csvReader(fileName)
 
+    println("Calculating the Total number of transactions per Day:")
+    groupDaySumAmount(data).foreach(println)
+
+    println("Calculating the Average number of Transactions per Account ID and Category:")
+    groupIDCatAvgAmount(data).foreach(println)
+
+    println("Calculating Statistics based on Account ID and the previous five days:")
+    lastFiveDayStatistics(data).foreach(println)
+
   }
 
   /**
@@ -17,10 +26,10 @@ object TransactionStatistics {
     * @return List[Transaction]
     */
   def csvReader(fileName:String): List[Transaction]  ={
-    val transactionslines = Source.fromFile(fileName).getLines().drop(1)
+    val transactionsLines = Source.fromFile(fileName).getLines().drop(1)
 
     //Here we split each line up by commas and construct Transactions
-    transactionslines.map { line =>
+    transactionsLines.map { line =>
       val split = line.split(',')
       Transaction(split(0), split(1), split(2).toInt, split(3), split(4).toDouble)
     }.toList
@@ -35,6 +44,7 @@ object TransactionStatistics {
     * @return Map[Int, Double]
     */
   def groupDaySumAmount(transactions: List[Transaction]): Map[Int, Double]={
+    // grouping by the transaction day then mapping back to the column names, then summing the transaction amounts
     transactions.groupBy(_.transactionDay).mapValues(_.map(_.transactionAmount).sum)
   }
 
@@ -45,6 +55,8 @@ object TransactionStatistics {
     * @return Map[String, Map[String, Double]
     */
   def groupIDCatAvgAmount(transactions: List[Transaction]): Map[String, Map[String, Double]]={
+    // Grouping by the account ID, then in the second column, mapping again with a group by category and calculating
+    // the average of the transaction amount
     transactions.groupBy(_.accountId)
         .mapValues(_.groupBy(_.category)
           .mapValues(_.map(_.transactionAmount))
@@ -58,9 +70,7 @@ object TransactionStatistics {
     * @param x List[Double] - Holds the double values which will be used to calculate the average
     * @return Double
     */
-  def calculateAvg(x: List[Double]): Double ={
-    x.sum/x.size
-  }
+  def calculateAvg(x: List[Double]): Double = x.sum/x.size
 
   /**
     * This function will take in a list of transactions and calculate a number of statistics on to based on the accounts
@@ -74,12 +84,39 @@ object TransactionStatistics {
     * @param transactions List[Transaction] - A List which holds transaction data
     * @return List[AccountStats]
     */
-  def lastFiveDayStatistics(transactions: List[Transaction])={
+  def lastFiveDayStatistics(transactions: List[Transaction]): List[AccountStats] ={
+    // partitioning the data into sections of the last 5 days of data
+    // first partitioning by the account ID
     val window = transactions.groupBy(_.accountId)
-      .mapValues(_.groupBy(_.transactionDay)
-          .mapValues(_.sortBy(_.transactionDay).reverse)
-        .iterator.sliding(6, 1).toList
-      )
+      // ordering the transaction values by the day to make the latest day (eg. 10) at the top
+      .mapValues(_.sortWith(_.transactionDay > _.transactionDay))
+      // partitioning by 6 which includes the current one
+      .mapValues(_.sliding(6, 1).toList)
+
+
+    window.flatMap { group =>
+      // _2 gets the transactions list per 5 day row
+      group._2.map { t =>
+        val currentDay: Int = t.head.transactionDay
+        // removing the current row so that's not counted within the statistics for that row, only the previous five
+        val lastFiveDays: List[Transaction] = t.drop(1)
+        // getting the maximum amount
+        val maximum: Double = lastFiveDays.map(_.transactionAmount).max
+        // getting the average amount of the last 5 days
+        val average: Double = calculateAvg(lastFiveDays.map(_.transactionAmount))
+        // getting total of those with the category AA
+        val aaTotal: Double = lastFiveDays.filter(_.category == "AA").map(_.transactionAmount).sum
+        // getting total of those with the category CC
+        val ccTotal: Double = lastFiveDays.filter(_.category == "CC").map(_.transactionAmount).sum
+        // getting total of those with the category FF
+        val ffTotal: Double = lastFiveDays.filter(_.category == "FF").map(_.transactionAmount).sum
+
+        // Saving the above values as a Account Stats case
+        // group._1 is the account ID
+        AccountStats(currentDay, group._1, maximum, average, aaTotal, ccTotal, ffTotal)
+      }
+    }.toList
+
   }
 
   //Define a case class Transaction which represents a transaction
@@ -95,8 +132,8 @@ object TransactionStatistics {
                           accountId: String,
                           maximum: Double,
                           average: Double,
-                          aatotal: Double,
-                          cctotal: Double,
-                          fftotal: Double)
+                          aaTotal: Double,
+                          ccTotal: Double,
+                          ffTotal: Double)
 
 }
