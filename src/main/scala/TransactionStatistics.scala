@@ -1,23 +1,56 @@
+import java.io.{BufferedWriter, File, FileWriter}
+
 import scala.io.Source
 
 object TransactionStatistics {
 
-  def main(): Unit = {
+  def main(args: Array[String]): Unit = {
 
     val fileName: String = "./src/main/resources/transactions.txt"
     // Read data
     val data: List[Transaction] = csvReader(fileName)
 
-    println("Calculating the Total number of transactions per Day:")
-    groupDaySumAmount(data).foreach(println)
+    val totalAmountPerDay:Map[Int, Double] = groupDaySumAmount(data)
+    val averagePerAccountCat:Map[String, Map[String, Double]] = groupIDCatAvgAmount(data)
+    val lastFiveStatistics:List[AccountStats] = lastFiveDayStatistics(data)
 
-    println("Calculating the Average number of Transactions per Account ID and Category:")
-    groupIDCatAvgAmount(data).foreach(println)
+    if(args(0) == "files"){
+      writeListToFile(lastFiveStatistics, "AccountStats.txt")
+    }else{
+      printingToConsole(totalAmountPerDay, averagePerAccountCat, lastFiveStatistics)
+    }
+  }
 
-    println("Calculating Statistics based on Account ID and the previous five days:")
-    lastFiveDayStatistics(data).foreach(println)
+
+  def writeListToFile(data:List[AccountStats], fileOutputName:String = "AccountStats.txt"): Unit={
+    val file = new File(fileOutputName)
+    val writer = new BufferedWriter(new FileWriter(fileOutputName))
+    data.foreach(writer.write)
+    writer.close()
+
 
   }
+
+  /**
+    * This function will take the transaction data and print the outputs from three different functions:
+    * groupDaySumAmount
+    * groupIDCatAvgAmount
+    * lastFiveDayStatistics
+    *
+    * @param data List[Transaction] - A List which holds transaction data
+    */
+  def printingToConsole(totalAmountPerDay:Map[Int, Double], averagePerAccountCat:Map[String, Map[String, Double]],
+                        lastFiveStatistics:List[AccountStats]):Unit={
+    println("Calculating the Total number of transactions per Day:")
+    totalAmountPerDay.foreach(println)
+
+    println("Calculating the Average number of Transactions per Account ID and Category:")
+    averagePerAccountCat.foreach(println)
+
+    println("Calculating Statistics based on Account ID and the previous five days:")
+    lastFiveStatistics.foreach(println)
+  }
+
 
   /**
     * This function will read in a csv from the file path and turn it into a List of transactions.
