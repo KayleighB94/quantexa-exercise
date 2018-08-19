@@ -10,26 +10,48 @@ object TransactionStatistics {
     // Read data
     val data: List[Transaction] = csvReader(fileName)
 
+    // Calling the functions to produce the statistical outputs
     val totalAmountPerDay:Map[Int, Double] = groupDaySumAmount(data)
     val averagePerAccountCat:Map[String, Map[String, Double]] = groupIDCatAvgAmount(data)
     val lastFiveStatistics:List[AccountStats] = lastFiveDayStatistics(data)
 
-    if(args(0) == "files"){
-      writeListToFile(lastFiveStatistics, "AccountStats.txt")
-    }else{
+    // If no argument is set, then the outputs are printed to console
+    if(args.isEmpty){
       printingToConsole(totalAmountPerDay, averagePerAccountCat, lastFiveStatistics)
+    }
+      // If the argument is set, and is files then the outputs are written to a file
+    else if(args(0) == "files"){
+      writeToFile(totalAmountPerDay.toList, "TotalAmountPerDay.txt")
+      writeToFile(averagePerAccountCat.toList, "AveragePerAccountCategory.txt")
+      writeToFile(lastFiveStatistics, "AccountStats.txt")
+    }
+      // if an argument is set but not equal to files, then a help message is printed and the system exits
+    else{
+      println("Invalid argument")
+      println("For the output to be printed in the console leave arguments blank")
+      println("For the output to written to files put files as a argument")
     }
   }
 
-
-  def writeListToFile(data:List[AccountStats], fileOutputName:String = "AccountStats.txt"): Unit={
+  /**
+    * This function will take is a list data and a file output name, then write the contents of the list to the file
+    * specified. It can be found within the project directory.
+    *
+    * @param data List[Any] - The data to be written out to a file
+    * @param fileOutputName String - The name of the file to write the data out to
+    */
+  def writeToFile(data:List[Any], fileOutputName:String): Unit={
     val file = new File(fileOutputName)
+    // This sets up a connection to the file to allow it to be written to
     val writer = new BufferedWriter(new FileWriter(fileOutputName))
-    data.foreach(writer.write)
+    // for each line within the list it will write it out to the file
+    for( x<- data){
+      writer.write(x +"\n")
+    }
+    // Once its finished writing to the file, it will then close it
     writer.close()
-
-
   }
+
 
   /**
     * This function will take the transaction data and print the outputs from three different functions:
@@ -42,13 +64,14 @@ object TransactionStatistics {
   def printingToConsole(totalAmountPerDay:Map[Int, Double], averagePerAccountCat:Map[String, Map[String, Double]],
                         lastFiveStatistics:List[AccountStats]):Unit={
     println("Calculating the Total number of transactions per Day:")
-    totalAmountPerDay.foreach(println)
+    println("Day   |  Total Amount")
+    totalAmountPerDay.toList.sortBy(_._1).foreach(println)
 
-    println("Calculating the Average number of Transactions per Account ID and Category:")
+    println("\n Calculating the Average number of Transactions per Account ID and Category:")
     averagePerAccountCat.foreach(println)
 
-    println("Calculating Statistics based on Account ID and the previous five days:")
-    lastFiveStatistics.foreach(println)
+    println("\n Calculating Statistics based on Account ID and the previous five days:")
+    lastFiveStatistics.sortBy(_.day).foreach(println)
   }
 
 
