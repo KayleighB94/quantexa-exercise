@@ -6,11 +6,18 @@ This exercise is to take the transaction data and build statistics functions in 
 * The last 5 days statistics (maximum, average, total for category AA, CC and FF) for each account ID and day.
 
 # Running the package
+There are two ways to get the statistics from the TransactionStatisitcs function, to have it output to the console or
+to have them written to files. This is decide by adding an argument at the end of the run command.
 
-```shell
-sbt run
+If you want it to print to console just run the run command
+
+```sbt shell
+run
 ```
-[More n running SBT commands](https://www.scala-sbt.org/1.x/docs/Running.html)
+If you want it to write them to files, add files to the end
+```sbt shell
+run files
+```
 
 # Running the tests
 The test created for the functions within the TransactionStatistics object were written using scala's scalatest 3.0.5
