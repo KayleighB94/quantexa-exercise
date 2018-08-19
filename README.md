@@ -29,6 +29,5 @@ test
 
 #Improvements
 * Change to Scala Spark
-* Stored the output as files
 * More unit test
 * Add more error handling into the methods
