@@ -24,7 +24,7 @@ The test created for the functions within the TransactionStatistics object were 
 library.
 In order to run the tests, you need to navigate to the project directory then run the command below in sbt shell.
 ```shell
-sbt test
+test
 ```
 
 #Improvements
