@@ -6,7 +6,7 @@ object TransactionStatistics {
 
   def main(args: Array[String]): Unit = {
 
-    val fileName: String = "./src/main/resources/transactions.txt"
+    val fileName: String = "./src/test/resources/transactions.txt"
     // Read data
     val data: List[Transaction] = csvReader(fileName)
 
